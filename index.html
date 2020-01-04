@@ -1,119 +1,4 @@
-const fs = require("fs");
-const pdf = require("html-pdf");
-const util = require("util");
-const axios = require("axios");
-const inquire = require("inquirer");
-
-const writeFileAsync = util.promisify(fs.writeFile);
-
-const colors = {
-     green: {
-          wrapperBackground: "#E6E1C3",
-          headerBackground: "#C1C72C",
-          headerColor: "black",
-          photoBorderColor: "black"
-     },
-     blue: {
-          wrapperBackground: "#5F64D3",
-          headerBackground: "#26175A",
-          headerColor: "white",
-          photoBorderColor: "#73448C"
-     },
-     pink: {
-          wrapperBackground: "#879CDF",
-          headerBackground: "#FF8374",
-          headerColor: "white",
-          photoBorderColor: "#FEE24C"
-     },
-     red: {
-          wrapperBackground: "#DE9967",
-          headerBackground: "#870603",
-          headerColor: "white",
-          photoBorderColor: "white"
-     }
-};
-
-let userInfo = {
-     username: "",
-     name: "",
-     color: "",
-     image: "",
-     location: "",
-     gitHubLink: "",
-     blog: "",
-     bio: "",
-     repos: "",
-     followers: "",
-     following: ""
-};
-
-async function prompt() {
-     try {
-          const ans = await inquire.prompt([
-               {
-                    type: "input",
-                    name: "username",
-                    message: "Enter your GitHub Username: "
-               },
-               {
-                    type: "list",
-                    name: "color",
-                    message: "What is your favorite color?",
-                    choices: [
-                         "pink",
-                         "red",
-                         "blue",
-                         "green"
-                    ]
-               }]);
-
-          userInfo.username = ans.username;
-          userInfo.color = ans.color;
-     }
-     catch (err) {
-          console.log(err);
-     }
-
-
-};
-
-function axiosCall() {
-
-     const queryUrl = `https://api.github.com/users/${userInfo.username}`;
-     return axios.get(queryUrl);
-};
-
-function getUserStarredData(queryUrl) {
-     return axios.get(queryUrl);
-};
-
-function setUserInfo(axiosResult) {
-     userInfo.name = axiosResult.data.name;
-     userInfo.location = axiosResult.data.location;
-     userInfo.image = axiosResult.data.avatar_url;
-     userInfo.gitHubLink = axiosResult.data.html_url;
-     userInfo.blog = axiosResult.data.blog;
-     userInfo.bio = axiosResult.data.bio;
-     userInfo.repos = axiosResult.data.public_repos;
-     userInfo.followers = axiosResult.data.followers;
-     userInfo.following = axiosResult.data.following;
-}
-
-
-async function main() {
-
-     await prompt();
-
-     const axiosResult = await axiosCall();
-     setUserInfo(axiosResult);
-
-     const queryUrl = ((axiosResult.data.starred_url).split("{"))[0];
-     const axiosResult2 = await getUserStarredData(queryUrl);
-
-     console.log(axiosResult.data);
-     const starredRepos = (axiosResult2.data.length);
-
-     let HTML = `<!DOCTYPE html>
+<!DOCTYPE html>
      <html lang="en">
      
      <head>
@@ -150,7 +35,7 @@ async function main() {
                }
      
                .wrapper {
-                    background-color: ${colors[userInfo.color].wrapperBackground};
+                    background-color: #E6E1C3;
                     padding-top: 100px;
                }
      
@@ -207,8 +92,8 @@ async function main() {
                     display: flex;
                     justify-content: center;
                     flex-wrap: wrap;
-                    background-color: ${colors[userInfo.color].headerBackground};
-                    color: ${colors[userInfo.color].headerColor};
+                    background-color: #C1C72C;
+                    color: black;
                     padding: 10px;
                     width: 95%;
                     border-radius: 6px;
@@ -220,7 +105,7 @@ async function main() {
                     border-radius: 50%;
                     object-fit: cover;
                     margin-top: -75px;
-                    border: 6px solid ${colors[userInfo.color].photoBorderColor};
+                    border: 6px solid black;
                     box-shadow: rgba(0, 0, 0, 0.3) 4px 1px 20px 4px;
                }
      
@@ -270,8 +155,8 @@ async function main() {
                .card {
                     padding: 20px;
                     border-radius: 6px;
-                    background-color: ${colors[userInfo.color].headerBackground};
-                    color: ${colors[userInfo.color].headerColor};
+                    background-color: #C1C72C;
+                    color: black;
                     margin: 20px;
                }
      
@@ -299,19 +184,19 @@ async function main() {
           <div class="wrapper">
                <div class="container">
                     <div class="photo-header">
-                         <img src="${userInfo.image}" alt="image">
+                         <img src="https://avatars3.githubusercontent.com/u/57238930?v=4" alt="image">
                          <h1>Hi!</h1>
-                         <h2>My name is ${userInfo.name}!</h2>
+                         <h2>My name is Abdur Rafay!</h2>
                          <h5>Currently @ UW Coding Bootcamp</h5>
                          <div class="links-nav">
                               <div class="nav-link">
-                                   <a href="https://www.google.com/maps/place/${userInfo.location}/"><i class="fas fa-location-arrow"></i> Location</a>
+                                   <a href="https://www.google.com/maps/place/Seattle, Washington/"><i class="fas fa-location-arrow"></i> Location</a>
                               </div>
                               <div class="nav-link">
-                                   <a href="${userInfo.gitHubLink}"><i class="fab fa-github-alt"></i> GitHub</a>
+                                   <a href="https://github.com/rafaykhawar09"><i class="fab fa-github-alt"></i> GitHub</a>
                               </div>
                               <div class="nav-link">
-                                   <a href="${userInfo.blog}"><i class="fas fa-rss"></i> Blog</a>
+                                   <a href="https://rafaykhawar09.github.io/homework2/"><i class="fas fa-rss"></i> Blog</a>
                               </div>
                          </div>
                     </div>
@@ -320,28 +205,28 @@ async function main() {
                     <div class="container">
                          <div class="row">
                               <div class="col">
-                                   <h1>${userInfo.bio}</h1>
+                                   <h1>I am an up-and-coming Front-End Developer.</h1>
                               </div>
                          </div>
                          <div class="row">
                               <div class="card col">
                                    <h2>Public Repositories</h2>
-                                   <h3>${userInfo.repos}</h3>
+                                   <h3>11</h3>
                               </div>
                               <div class="card col">
                                    <h2>Followers</h2>
-                                   <h3>${userInfo.followers}</h3>
+                                   <h3>1</h3>
                               </div>
                          </div>
                          <div class="row">
                               <div class="card col">
                                    <h2>GitHub Stars</h2>
                                    <!--arbitrary value-->
-                                   <h3>${starredRepos}</h3>
+                                   <h3>1</h3>
                               </div>
                               <div class="card col">
                                    <h2>Following</h2>
-                                   <h3>${userInfo.following}</h3>
+                                   <h3>1</h3>
                               </div>
                          </div>
                     </div>
@@ -349,15 +234,4 @@ async function main() {
           </div>
      </body>
      
-     </html>`;
-
-     writeFileAsync("index.html", HTML);
-
-     var options = {format: 'Letter'};
-     pdf.create(HTML, options).toFile("./profile.pdf", function(err, res){
-          if(err)
-               return console.log(err);
-     });
-}
-
-main();
+     </html>
