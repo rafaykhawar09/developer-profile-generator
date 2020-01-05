@@ -1,8 +1,11 @@
-const fs = require("fs");
-const pdf = require("html-pdf");
+
 const util = require("util");
+const fs = require("fs");
+
 const axios = require("axios");
 const inquire = require("inquirer");
+const gs = require("github-scraper");
+const pdfCrowd = require("pdfcrowd");
 
 const writeFileAsync = util.promisify(fs.writeFile);
 
@@ -83,10 +86,6 @@ function axiosCall() {
      return axios.get(queryUrl);
 };
 
-function getUserStarredData(queryUrl) {
-     return axios.get(queryUrl);
-};
-
 function setUserInfo(axiosResult) {
      userInfo.name = axiosResult.data.name;
      userInfo.location = axiosResult.data.location;
@@ -107,13 +106,9 @@ async function main() {
      const axiosResult = await axiosCall();
      setUserInfo(axiosResult);
 
-     const queryUrl = ((axiosResult.data.starred_url).split("{"))[0];
-     const axiosResult2 = await getUserStarredData(queryUrl);
+     gs(userInfo.username, function (err, data) {
 
-     console.log(axiosResult.data);
-     const starredRepos = (axiosResult2.data.length);
-
-     let HTML = `<!DOCTYPE html>
+          let HTML = `<!DOCTYPE html>
      <html lang="en">
      
      <head>
@@ -337,7 +332,7 @@ async function main() {
                               <div class="card col">
                                    <h2>GitHub Stars</h2>
                                    <!--arbitrary value-->
-                                   <h3>${starredRepos}</h3>
+                                   <h3>${data.stars}</h3>
                               </div>
                               <div class="card col">
                                    <h2>Following</h2>
@@ -350,13 +345,25 @@ async function main() {
      </body>
      
      </html>`;
+          
+          writeFileAsync("index.html", HTML)
+          .then(() => {
 
-     writeFileAsync("index.html", HTML);
+               let client = new pdfCrowd.HtmlToPdfClient("rafaykhawar09", "bb12c5ec5f7dcc1a514436aba09a44ce");
 
-     var options = {format: 'Letter'};
-     pdf.create(HTML, options).toFile("./profile.pdf", function(err, res){
-          if(err)
-               return console.log(err);
+               client.convertFileToFile(
+                    "./index.html", 
+                    "profile.pdf", 
+                    function(err, fileName){
+                         if(err)
+                         return console.error("Pdfcrowd Error: " + err);
+                         
+                         console.log("Success: the file was created " + fileName);
+                    }
+               );
+          })
+          .catch(err => console.log(err));
+          
      });
 }
 
